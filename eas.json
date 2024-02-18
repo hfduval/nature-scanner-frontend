@@ -9,10 +9,11 @@
     },
     "production": {
       "android": {
-        "image": "latest"
+        "image": "latest",
       },
       "ios": {
-        "image": "latest"
+        "image": "latest",
+        "simulator": true,
       }
     }
   }
