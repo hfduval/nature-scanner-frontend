@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "MyExpoProject",
-    "slug": "MyExpoProject",
+    "slug": "nature-scanner",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -16,13 +16,15 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hfduval.naturescanner"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.hfduval.naturescanner"
     },
     "web": {
       "bundler": "metro",
@@ -34,6 +36,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "9c85a6c3-affc-4522-a0f2-ad3a548e2ecf"
+      }
+    },
+    "owner": "hfduval"
   }
 }
