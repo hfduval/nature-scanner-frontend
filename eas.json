@@ -10,7 +10,12 @@
       "image": "latest"
     },
     "production": {
-      "image": "latest"
+      "android": {
+        "image": "latest"
+      },
+      "ios": {
+        "image": "latest"
+      }
     }
   }
 }
