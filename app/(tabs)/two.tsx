@@ -1,32 +1,37 @@
-import { Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Camera } from 'expo-camera';
 import { useState } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-import { Text, View } from '@/components/Themed';
+import { View } from '@/components/Themed';
 import Scanner from '@/components/Scanner';
 
 export default function TabTwoScreen() {
   const [permission, requestPermission] = Camera.useCameraPermissions();
   const [showScanner, setShowScanner] = useState(false);
 
+  const noPermissionsAlert = () =>
+    Alert.alert('Invalid Camera Permissions', 'Please provide access in your settings app', [
+      {text: 'OK', onPress: () => console.log('OK Pressed')},
+  ]);
+
   function renderScanner() {
     requestPermission();
-    setShowScanner(true);
-  }
-  
+
     if (!permission) {
-      return <View />;
+      return (
+        <View />
+      );
     }
   
     if (!permission.granted) {
-        return (
-            <View style={styles.container}>
-              <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
-              <Button onPress={requestPermission} title="grant permission" />
-            </View>
-          );
+        noPermissionsAlert();
     }
+
+    if (permission.granted) {
+      setShowScanner(true);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -45,7 +50,7 @@ export default function TabTwoScreen() {
           <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
           <Button
             title="Take a photo"
-            onPress={() => setShowScanner(true)}
+            onPress={() => renderScanner()}
           />
         </View>
       )}
