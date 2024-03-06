@@ -1,51 +1,112 @@
-import React from 'react';
-import { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
-import { AutoFocus, Camera, CameraType } from 'expo-camera';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import React, { useState } from 'react';
+import { View, TouchableOpacity,  Image, StyleSheet } from 'react-native';
+import {Camera, CameraType, FlashMode} from 'expo-camera';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function Scanner() {
-    const [type, setType] = useState(CameraType.back);
-  
-    function toggleCameraType() {
-      setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
+const Scanner = () => {
+  const [type, setType] = useState(CameraType.back);
+  const [flashMode, setFlashMode] = useState(FlashMode.off);
+  const [zoom, setZoom] = useState(0);
+  const [recentPictureUri, setRecentPictureUri] = useState<string | null>(null);
+
+  const toggleCameraType = () => {
+    setType(
+        type === CameraType.back
+            ? CameraType.front
+            : CameraType.back
+    );
+  };
+
+  const toggleFlash = () => {
+    setFlashMode(
+        flashMode === FlashMode.on
+            ? FlashMode.off
+            : FlashMode.on
+    );
+  };
+
+  const takePicture = async () => {
+    if (cameraRef.current) {
+      const picture = await cameraRef.current.takePictureAsync();
+      setRecentPictureUri(picture.uri);
     }
-  
-    return (
+  };
+
+  let cameraRef = React.useRef<Camera>(null);
+
+  return (
       <View style={styles.container}>
-        <Camera style={styles.camera} type={type} autoFocus={AutoFocus.on}>
+        <Camera style={styles.camera} type={type} flashMode={flashMode} zoom={zoom} ref={cameraRef}>
           <View style={styles.buttonContainer}>
+
+            {/* Toggle Camera Type */}
             <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
-              <FontAwesome name="retweet" size={30} color="#000"/>
+              <MaterialCommunityIcons name="camera-flip-outline" size={24} color="white" />
             </TouchableOpacity>
+
+            {/* Take Picture */}
+            <TouchableOpacity style={styles.takePictureButton} onPress={takePicture}>
+              <MaterialCommunityIcons name="camera-iris" size={48} color="white" />
+            </TouchableOpacity>
+
+            {/* Toggle Flash */}
+            <TouchableOpacity style={styles.button} onPress={toggleFlash}>
+              <MaterialCommunityIcons name="flash" size={24} color="white" />
+            </TouchableOpacity>
+
+            {/* Gallery Thumbnail */}
+            {recentPictureUri && (
+                <Image
+                    source={{ uri: recentPictureUri }}
+                    style={styles.thumbnail}
+                />
+            )}
           </View>
         </Camera>
       </View>
-    );
-  }
-  
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      width: '100%',
-      height: '100%',
-    },
-    camera: {
-      flex: 1,
-    },
-    buttonContainer: {
-      flex: 1,
-      justifyContent: 'flex-start',
-      alignItems: 'flex-end',
-      backgroundColor: 'transparent',
-      top: 30,
-      left: 330,
-      width: 50,
-      height: 50,
-    },
-    button: {
-      flex: 1,
-      alignItems: 'center',
-    },
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  camera: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  buttonContainer: {
+    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    margin: 20,
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  button: {
+    flex: 0.1,
+    alignSelf: 'flex-end',
+    alignItems: 'center',
+  },
+  takePictureButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 80,
+    height: 80,
+    borderRadius: 50,
+  },
+  thumbnail: {
+    width: 50,
+    height: 50,
+    borderRadius: 10, // Adjust this value to set the desired roundness of the corners
+    alignSelf: 'center',
+    borderWidth: 1, // Optional: if you want a border around the thumbnail
+    borderColor: '#fff', // Optional: color of the border
+  },
+  text: {
+    fontSize: 18,
+    color: 'white',
+  },
 });
+
+export default Scanner;

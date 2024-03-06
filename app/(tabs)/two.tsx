@@ -16,7 +16,7 @@ export default function TabTwoScreen() {
   ]);
 
   function renderScanner() {
-    requestPermission();
+    requestPermission().then(r => console.log(r));
 
     if (!permission) {
       return (
