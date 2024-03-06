@@ -42,7 +42,7 @@ export default function TabTwoScreen() {
             style={styles.closeButton}
             onPress={() => setShowScanner(false)}
           >
-            <FontAwesome name="times" size={30} color="#000" />
+            <FontAwesome name="times" size={25} color="#fff" />
           </TouchableOpacity>
         </View>
       ) : (
