@@ -98,10 +98,10 @@ const styles = StyleSheet.create({
   thumbnail: {
     width: 50,
     height: 50,
-    borderRadius: 10, // Adjust this value to set the desired roundness of the corners
+    borderRadius: 10,
     alignSelf: 'center',
-    borderWidth: 1, // Optional: if you want a border around the thumbnail
-    borderColor: '#fff', // Optional: color of the border
+    borderWidth: 1,
+    borderColor: '#fff',
   },
   text: {
     fontSize: 18,
