@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { View, TouchableOpacity,  Image, StyleSheet } from 'react-native';
 import {Camera, CameraType, FlashMode} from 'expo-camera';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 const Scanner = () => {
   const [type, setType] = useState(CameraType.back);
   const [flashMode, setFlashMode] = useState(FlashMode.off);
   const [zoom, setZoom] = useState(0);
   const [recentPictureUri, setRecentPictureUri] = useState<string | null>(null);
+  const [viewImage, setViewImage] = useState(false);
 
   const toggleCameraType = () => {
     setType(
@@ -56,13 +58,29 @@ const Scanner = () => {
 
             {/* Gallery Thumbnail */}
             {recentPictureUri && (
-                <Image
-                    source={{ uri: recentPictureUri }}
-                    style={styles.thumbnail}
-                />
+              <View>
+                {!viewImage &&
+                  <TouchableOpacity
+                    onPress={() => setViewImage(true)}
+                  >
+                    <Image
+                      source={{ uri: recentPictureUri }}
+                      style={styles.thumbnail}
+                    />
+                  </TouchableOpacity>
+                }
+              </View>
             )}
           </View>
         </Camera>
+        {viewImage && recentPictureUri &&
+          <View style={styles.fullscreen}>
+            <Image
+              source={{ uri: recentPictureUri }}
+              style={styles.fullscreen}
+            />
+          </View>
+        }
       </View>
   );
 };
@@ -103,9 +121,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#fff',
   },
+  fullscreen: {
+    height: '100%',
+    width: '100%',
+  },
   text: {
     fontSize: 18,
     color: 'white',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    width: 50,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
   },
 });
 
