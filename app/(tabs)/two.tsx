@@ -1,59 +1,68 @@
-import { Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { Camera } from 'expo-camera';
-import { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, View, TouchableOpacity, Button, Text, Image, Modal, Alert, Linking } from 'react-native';
+import { Camera, CameraType } from 'expo-camera';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-
-import { View } from '@/components/Themed';
-import Scanner from '@/components/Scanner';
 
 export default function TabTwoScreen() {
   const [permission, requestPermission] = Camera.useCameraPermissions();
-  const [showScanner, setShowScanner] = useState(false);
+  const [type, setType] = useState(CameraType.back);
+  const cameraRef = useRef(null);
 
-  const noPermissionsAlert = () =>
-    Alert.alert('Invalid Camera Permissions', 'Please provide access in your settings app', [
-      {text: 'OK', onPress: () => console.log('OK Pressed')},
-  ]);
-
-  function renderScanner() {
-    requestPermission().then(r => console.log(r));
-
-    if (!permission) {
-      return (
-        <View />
-      );
+  // Define handlePermissionRequest before using it
+  const handlePermissionRequest = async () => {
+    const { status } = await Camera.getCameraPermissionsAsync();
+    if (status !== 'granted') {
+      // If permissions are denied, guide the user to enable them from settings
+      showAlertToOpenSettings();
     }
-  
-    if (!permission.granted) {
-        noPermissionsAlert();
-    }
+  };
 
-    if (permission.granted) {
-      setShowScanner(true);
-    }
+  useEffect(() => {
+    // Optionally check permissions when the app starts
+    handlePermissionRequest(); // Now calling handlePermissionRequest correctly after its definition
+  }, []);
+
+  const showAlertToOpenSettings = () => {
+    Alert.alert(
+      "Camera Permission",
+      "Camera permission is needed to take pictures. Please go to your device's settings to enable it.",
+      [
+        { text: "Don't Allow", style: 'cancel' },
+        { text: 'Open Settings', onPress: () => Linking.openURL('app-settings:') },
+      ]
+    );
+  };
+
+  if (!permission) {
+    // Permissions still loading
+    return <View style={styles.container}><Text>Loading...</Text></View>;
+  }
+
+  if (!permission.granted) {
+    // Permissions not granted
+    return (
+      <View style={styles.container}>
+        <Text style={styles.text}>We need your permission to use the camera</Text>
+        <Button onPress={handlePermissionRequest} title="Grant Permission" />
+      </View>
+    );
+  }
+
+  function toggleCameraType() {
+    setType((currentType) => (currentType === CameraType.back ? CameraType.front : CameraType.back));
   }
 
   return (
     <View style={styles.container}>
-      {showScanner ? (
-        <View style={styles.scanner}>
-          <Scanner />
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setShowScanner(false)}
-          >
-            <FontAwesome name="times" size={25} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <View>
-          <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-          <Button
-            title="Take a photo"
-            onPress={() => renderScanner()}
-          />
-        </View>
-      )}
+      <Camera 
+        style={styles.scanner} 
+        type={type} 
+        ref={cameraRef}>
+        {/* Camera UI here */}
+      </Camera>
+      <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
+        <Text style={styles.text}>Flip Camera</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -61,32 +70,23 @@ export default function TabTwoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   scanner: {
     flex: 1,
-    height: '100%',
     width: '100%',
+    height: '100%',
   },
-  closeButton: {
+  button: {
     position: 'absolute',
-    top: 20,
-    left: 20,
-    width: 50,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1,
-    
+    bottom: 20,
+    backgroundColor: "#ffffff90",
+    padding: 10,
+    borderRadius: 20,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+  text: {
+    color: 'black',
+    fontSize: 18,
   },
 });

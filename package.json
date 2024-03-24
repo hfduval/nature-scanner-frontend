@@ -17,7 +17,7 @@
     "@react-navigation/native": "^6.0.2",
     "eas": "^0.1.0",
     "expo": "~50.0.8",
-    "expo-camera": "~14.0.5",
+    "expo-camera": "~14.1.1",
     "expo-font": "~11.10.3",
     "expo-linking": "~6.2.2",
     "expo-permissions": "^14.4.0",

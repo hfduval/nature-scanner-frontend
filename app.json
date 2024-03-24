@@ -31,12 +31,17 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+    "dependencies": {
+      "expo-camera": "~14.1.1"
+    },
     "plugins": [
       "expo-router",
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true
         }
       ]
     ],
