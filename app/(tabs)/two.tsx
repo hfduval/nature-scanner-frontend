@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, TouchableOpacity, Button, Text, Modal, Image, ScrollView, Alert, Linking } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Button, Text, Modal, Image, ActivityIndicator, Alert, Linking } from 'react-native';
 import { Camera, CameraType } from 'expo-camera';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+
+import { GetPresignedURL, UploadToS3, ProcessApi } from '@/functions/Api';
 
 export default function TabTwoScreen() {
   const [permission, requestPermission] = Camera.useCameraPermissions();
   const [type, setType] = useState(CameraType.back);
   const [cameraReady, setCameraReady] = useState(false);
   const [recentPhotos, setRecentPhotos] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [renderSpeciesInfo, setRenderSpeciesInfo] = useState(false);
   const cameraRef = useRef<Camera | null>(null);
 
   const [isPreviewVisible, setIsPreviewVisible] = useState(false); 
@@ -74,6 +78,45 @@ export default function TabTwoScreen() {
   const togglePreview = () => {
     setIsPreviewVisible(!isPreviewVisible);
   };
+
+  const uploadImage = async (image: any) => {
+    setUploading(true);
+    setIsPreviewVisible(false);
+    let responseGet = await GetPresignedURL();
+    if (!responseGet.success) {
+      setUploading(false);
+      Alert.alert("Error", "Failed to upload picture");
+    } else {
+      let responsePut = await UploadToS3(image, responseGet.data.url)
+      if (!responsePut.success) {
+        Alert.alert("Error", "Failed to upload picture");
+      } else {
+        processImage(responseGet.data.key);
+      }
+    }
+  }
+
+  const processImage = async (key: any) => {
+    let response = await ProcessApi(key);
+    if (!response.success) {
+      setUploading(false);
+      Alert.alert("Error", "Failed to process picture");
+    } else {
+      setUploading(false);
+      setRenderSpeciesInfo(true);
+    }
+  }
+
+  /** FIXME @FRANCO */
+  if (renderSpeciesInfo) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.text}>The animal species is: </Text>
+        <Button onPress={() => setRenderSpeciesInfo(false)} title="Animal species page NEEDS FIX" />
+      </View>
+    )
+  }
+
   return (
     <View style={styles.container}>
       <Camera 
@@ -109,7 +152,18 @@ export default function TabTwoScreen() {
             <TouchableOpacity style={styles.closePreview} onPress={togglePreview}>
               <Text style={{color: 'white', fontSize: 18}}>Close</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.uploadPreview} onPress={() => uploadImage(recentPhotos[0])}>
+              <Text style={{color: 'white', fontSize: 18}}>Upload</Text>
+            </TouchableOpacity>
             <Image source={{ uri: recentPhotos[0] }} style={styles.fullPhoto} />
+          </View>
+        </Modal>
+      )}
+      {uploading && (
+        <Modal visible={uploading} transparent={false} animationType="fade">
+          <View style={styles.previewModal}>
+            <ActivityIndicator />
+              <Text style={{color: 'white', fontSize: 18, top: 10}}>Uploading...</Text>
           </View>
         </Modal>
       )}
@@ -185,7 +239,13 @@ const styles = StyleSheet.create({
   },
   closePreview: {
     position: 'absolute',
-    top: 50,
+    top: 60,
+    left: 20,
+    zIndex: 10,
+  },
+  uploadPreview: {
+    position: 'absolute',
+    top: 60,
     right: 20,
     zIndex: 10,
   },
