@@ -4,6 +4,7 @@ import { Camera, CameraType } from 'expo-camera';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import { GetPresignedURL, UploadToS3, ProcessApi } from '@/functions/Api';
+import {HeaderTitle} from "@react-navigation/elements";
 
 export default function TabTwoScreen() {
   const [permission, requestPermission] = Camera.useCameraPermissions();
@@ -12,6 +13,7 @@ export default function TabTwoScreen() {
   const [recentPhotos, setRecentPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [renderSpeciesInfo, setRenderSpeciesInfo] = useState(false);
+  const [responseData, setResponseData] = useState<any>([]);
   const cameraRef = useRef<Camera | null>(null);
 
   const [isPreviewVisible, setIsPreviewVisible] = useState(false); 
@@ -98,10 +100,13 @@ export default function TabTwoScreen() {
 
   const processImage = async (key: any) => {
     let response = await ProcessApi(key);
+    console.log(response)
     if (!response.success) {
       setUploading(false);
       Alert.alert("Error", "Failed to process picture");
     } else {
+      console.log(response.data.choices[0].message.content)
+      setResponseData(response.data.choices[0].message.content);
       setUploading(false);
       setRenderSpeciesInfo(true);
     }
@@ -109,10 +114,14 @@ export default function TabTwoScreen() {
 
   /** FIXME @FRANCO */
   if (renderSpeciesInfo) {
+    console.log(responseData);
     return (
       <View style={styles.container}>
-        <Text style={styles.text}>The animal species is: </Text>
-        <Button onPress={() => setRenderSpeciesInfo(false)} title="Animal species page NEEDS FIX" />
+        <HeaderTitle style={styles.header}>Species Identifier</HeaderTitle>
+        <Image source={{ uri: recentPhotos[0] }} style={styles.infoPhoto} />
+        <Text style={styles.text}>{responseData}</Text>
+        {/*make this button the exit button on top right*/}
+        <Button onPress={() => setRenderSpeciesInfo(false)} title="Exit" />
       </View>
     )
   }
@@ -187,8 +196,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    left: 20, // Padding from the left edge of the screen
-    right: 20, // Padding from the right edge of the screen
+    left: 20,
+    right: 20,
     bottom: 50,
   },
   cameraButton: {
@@ -260,7 +269,29 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   text: {
-    color: 'black',
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    color: 'white',
     fontSize: 18,
   },
+  header: {
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    color: 'white',
+    fontSize: 30,
+  },
+  infoPhoto: {
+    width: '90%',
+    height: '60%',
+    resizeMode: 'cover',
+    borderWidth: 2,
+    borderColor: 'white',
+    borderRadius: 10,
+  },
+  exitButton: {
+    position: 'relative',
+    width: 30,
+    height: 30,
+    backgroundColor: 'grey',
+  }
 });
